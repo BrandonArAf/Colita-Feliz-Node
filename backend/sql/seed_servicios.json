@@ -1,0 +1,23 @@
+[
+  {
+    "id": "cuidado",
+    "nombre": "Cuidado diario",
+    "descripcion": "Guarder\u00eda con juegos, descanso y supervisi\u00f3n.",
+    "precioDia": 10000,
+    "adicional": 0
+  },
+  {
+    "id": "paseo",
+    "nombre": "Cuidado + Paseo",
+    "descripcion": "Incluye 30\u201345 min de paseo guiado.",
+    "precioDia": 14000,
+    "adicional": 0
+  },
+  {
+    "id": "bano",
+    "nombre": "Cuidado + Ba\u00f1o",
+    "descripcion": "Ba\u00f1o de salida + cuidado diario.",
+    "precioDia": 10000,
+    "adicional": 8000
+  }
+]
