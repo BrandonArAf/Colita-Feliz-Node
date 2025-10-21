@@ -80,23 +80,6 @@ describe('MockData Store', () => {
     expect(datosGuardados.registros).toBeDefined();
   });
 
-  it('resetea datos a estado inicial', async () => {
-    // Crear un servicio personalizado
-    await mockStore.createServicio({
-      nombre: 'Servicio Temporal',
-      descripcion: 'Temporal',
-      precioDia: 1000,
-      adicional: 0
-    });
-
-    // Resetear datos
-    await mockStore.resetData();
-
-    // Verificar que se volvió al estado inicial
-    const servicios = await mockStore.getServicios();
-    expect(servicios.length).toBe(3); // Los 3 servicios iniciales
-    expect(servicios.find(s => s.nombre === 'Servicio Temporal')).toBeUndefined();
-  });
 
   it('maneja errores correctamente', async () => {
     try {

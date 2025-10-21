@@ -239,13 +239,6 @@ class MockDataStore {
     });
   }
 
-  // Resetear datos a estado inicial
-  async resetData() {
-    await this.delay();
-    localStorage.removeItem(this.storageKey);
-    this.data = this.loadFromStorage();
-    return true;
-  }
 }
 
 // Crear instancia global del store

@@ -6,7 +6,7 @@ export default function (config) {
     ],
     preprocessors: {},
     reporters: ['progress'],
-    browsers: ['ChromeHeadless'],
+    browsers: ['Chrome', 'ChromeHeadless'],
     singleRun: false,
   });
 }

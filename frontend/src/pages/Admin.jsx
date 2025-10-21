@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getRegistros, eliminarRegistro, resetMockData, getServicios } from '../lib/api.js';
+import { getRegistros, eliminarRegistro, getServicios } from '../lib/api.js';
 import ServicioManager from '../components/ServicioManager.jsx';
 
 export default function Admin(){
@@ -58,18 +58,6 @@ export default function Admin(){
     }
   };
 
-  const handleResetData = async () => {
-    if (confirm('¿Está seguro de resetear todos los datos? Esta acción no se puede deshacer.')) {
-      try {
-        await resetMockData();
-        await loadRegistros();
-        alert('Datos reseteados correctamente');
-      } catch (error) {
-        console.error('Error reseteando datos:', error);
-        alert('Error al resetear los datos');
-      }
-    }
-  };
 
   const exportToExcel = () => {
     // Crear contenido CSV más ordenado y profesional
@@ -169,107 +157,6 @@ export default function Admin(){
     document.body.removeChild(link);
   };
 
-  const exportReporteEjecutivo = () => {
-    const fechaActual = new Date().toLocaleDateString('es-CL');
-    const horaActual = new Date().toLocaleTimeString('es-CL');
-    
-    // Calcular estadísticas
-    const totalRegistros = filteredItems.length;
-    const ingresosTotales = totalRevenue;
-    const promedioPorRegistro = totalRegistros > 0 ? ingresosTotales / totalRegistros : 0;
-    
-    // Estadísticas por servicio
-    const estadisticasServicios = servicios.map(servicio => {
-      const registrosServicio = filteredItems.filter(r => r.servicio_id === servicio.id);
-      const ingresosServicio = registrosServicio.reduce((sum, r) => sum + r.total, 0);
-      return {
-        nombre: servicio.nombre,
-        cantidad: registrosServicio.length,
-        ingresos: ingresosServicio,
-        porcentaje: totalRegistros > 0 ? (registrosServicio.length / totalRegistros * 100) : 0
-      };
-    }).sort((a, b) => b.ingresos - a.ingresos);
-
-    // Estadísticas por mes
-    const registrosPorMes = {};
-    filteredItems.forEach(registro => {
-      const mes = new Date(registro.ingreso).toLocaleDateString('es-CL', { year: 'numeric', month: 'long' });
-      if (!registrosPorMes[mes]) {
-        registrosPorMes[mes] = { cantidad: 0, ingresos: 0 };
-      }
-      registrosPorMes[mes].cantidad++;
-      registrosPorMes[mes].ingresos += registro.total;
-    });
-
-    // Crear contenido del reporte ejecutivo
-    const contenido = [
-      'REPORTE EJECUTIVO - COLITA FELIZ GUARDERÍA CANINA',
-      `Fecha de generación: ${fechaActual} ${horaActual}`,
-      '',
-      'RESUMEN GENERAL:',
-      `• Total de registros: ${totalRegistros}`,
-      `• Ingresos totales: $${new Intl.NumberFormat('es-CL').format(ingresosTotales)}`,
-      `• Promedio por registro: $${new Intl.NumberFormat('es-CL').format(promedioPorRegistro)}`,
-      '',
-      'ANÁLISIS POR SERVICIOS:',
-      ...estadisticasServicios.map(s => 
-        `• ${s.nombre}: ${s.cantidad} registros (${s.porcentaje.toFixed(1)}%) - $${new Intl.NumberFormat('es-CL').format(s.ingresos)}`
-      ),
-      '',
-      'ANÁLISIS POR MES:',
-      ...Object.entries(registrosPorMes).map(([mes, datos]) => 
-        `• ${mes}: ${datos.cantidad} registros - $${new Intl.NumberFormat('es-CL').format(datos.ingresos)}`
-      ),
-      '',
-      'TOP 5 CLIENTES:',
-      ...filteredItems
-        .reduce((acc, registro) => {
-          const existente = acc.find(c => c.dueno === registro.dueno);
-          if (existente) {
-            existente.registros++;
-            existente.total += registro.total;
-          } else {
-            acc.push({
-              dueno: registro.dueno,
-              registros: 1,
-              total: registro.total
-            });
-          }
-          return acc;
-        }, [])
-        .sort((a, b) => b.total - a.total)
-        .slice(0, 5)
-        .map((cliente, index) => 
-          `${index + 1}. ${cliente.dueno}: ${cliente.registros} registros - $${new Intl.NumberFormat('es-CL').format(cliente.total)}`
-        ),
-      '',
-      'RECOMENDACIONES:',
-      `• Servicio más popular: ${estadisticasServicios[0]?.nombre || 'N/A'}`,
-      `• Oportunidad de crecimiento: ${estadisticasServicios[estadisticasServicios.length - 1]?.nombre || 'N/A'}`,
-      `• Cliente VIP: ${filteredItems.reduce((acc, r) => {
-        const existente = acc.find(c => c.dueno === r.dueno);
-        if (existente) {
-          existente.total += r.total;
-        } else {
-          acc.push({ dueno: r.dueno, total: r.total });
-        }
-        return acc;
-      }, []).sort((a, b) => b.total - a.total)[0]?.dueno || 'N/A'}`,
-      '',
-      '--- FIN DEL REPORTE EJECUTIVO ---'
-    ].join('\n');
-
-    // Crear y descargar archivo
-    const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `Reporte_Ejecutivo_Colita_Feliz_${new Date().toISOString().split('T')[0]}.txt`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const filteredItems = items
     .filter(item => 
@@ -318,14 +205,6 @@ export default function Admin(){
                   <p className="mb-0 opacity-75">Gestión completa del sistema</p>
                 </div>
                 <div className="col-auto">
-                  <button 
-                    className="btn btn-warning me-2" 
-                    onClick={handleResetData}
-                    title="Resetear datos a estado inicial"
-                  >
-                    <i className="fas fa-undo me-2"></i>
-                    Resetear Datos
-                  </button>
                   {activeTab === 'registros' && (
                     <>
                       <button 
@@ -336,15 +215,6 @@ export default function Admin(){
                       >
                         <i className="fas fa-file-excel me-2"></i>
                         Exportar Reporte
-                      </button>
-                      <button 
-                        className="btn btn-info me-2" 
-                        onClick={exportReporteEjecutivo}
-                        disabled={items.length === 0}
-                        title="Exportar resumen ejecutivo"
-                      >
-                        <i className="fas fa-chart-line me-2"></i>
-                        Reporte Ejecutivo
                       </button>
                       <button 
                         className="btn btn-light" 

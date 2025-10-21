@@ -175,7 +175,3 @@ export async function getRegistrosByServicio(servicioId) {
 export async function getRegistrosByDateRange(fechaInicio, fechaFin) {
   return await mockStore.getRegistrosByDateRange(fechaInicio, fechaFin);
 }
-
-export async function resetMockData() {
-  return await mockStore.resetData();
-}
